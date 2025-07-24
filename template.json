@@ -3,35 +3,35 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vmName": {
-            "type": "string",
+            "type": "String",
             "metadata": {
                 "description": "Name of the virtual machine"
             }
         },
         "adminUsername": {
-            "type": "string",
+            "type": "String",
             "metadata": {
                 "description": "Username for the virtual machine"
             }
         },
         "adminPassword": {
-            "type": "secureString",
+            "type": "SecureString",
             "metadata": {
                 "description": "Password for the virtual machine"
             }
         },
         "location": {
-            "type": "string",
             "defaultValue": "eastus",
+            "type": "String",
             "metadata": {
                 "description": "Location for all resources"
             }
         },
         "osDiskSizeGB": {
-            "type": "int",
             "defaultValue": 30,
             "minValue": 30,
             "maxValue": 1023,
+            "type": "Int",
             "metadata": {
                 "description": "OS disk size in GB (minimum 30GB, maximum 1023GB)"
             }
@@ -41,7 +41,6 @@
         "vnetName": "[concat(parameters('vmName'), '-vnet')]",
         "nsgName": "[concat(parameters('vmName'), '-nsg')]",
         "nicName": "[concat(parameters('vmName'), '-nic')]",
-        "pipName": "[concat(parameters('vmName'), '-pip')]",
         "subnetName": "default",
         "vmSize": "Standard_B1ls"
     },
@@ -104,25 +103,12 @@
             }
         },
         {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2020-06-01",
-            "name": "[variables('pipName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic",
-                "dnsSettings": {
-                    "domainNameLabel": "[toLower(concat(parameters('vmName'), uniqueString(resourceGroup().id)))]"
-                }
-            }
-        },
-        {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-06-01",
             "name": "[variables('nicName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
-                "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
             ],
             "properties": {
@@ -133,10 +119,7 @@
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
                             },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
-                            }
+                            "privateIPAllocationMethod": "Dynamic"
                         }
                     }
                 ],
@@ -187,51 +170,39 @@
     ],
     "outputs": {
         "resourceGroup": {
-            "type": "string",
+            "type": "String",
             "value": "[resourceGroup().name]"
         },
         "vmName": {
-            "type": "string",
+            "type": "String",
             "value": "[parameters('vmName')]"
         },
         "vmSize": {
-            "type": "string",
+            "type": "String",
             "value": "[variables('vmSize')]"
         },
         "adminUsername": {
-            "type": "string",
+            "type": "String",
             "value": "[parameters('adminUsername')]"
         },
         "osDiskSizeGB": {
-            "type": "int",
+            "type": "Int",
             "value": "[parameters('osDiskSizeGB')]"
         },
         "virtualNetworkName": {
-            "type": "string",
+            "type": "String",
             "value": "[variables('vnetName')]"
         },
         "networkSecurityGroupName": {
-            "type": "string",
+            "type": "String",
             "value": "[variables('nsgName')]"
         },
         "privateIPAddress": {
-            "type": "string",
+            "type": "String",
             "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
         },
-        "publicIPResourceId": {
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]"
-        },
-        "publicDNSDomainName": {
-            "type": "string",
-            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))).dnsSettings.domainNameLabel]"
-        },
-        "publicDNSFqdn": {
-            "type": "string",
-            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))).dnsSettings.fqdn]"
-        },
         "deploymentDetails": {
-            "type": "object",
+            "type": "Object",
             "value": {
                 "vmName": "[parameters('vmName')]",
                 "resourceGroup": "[resourceGroup().name]",
@@ -240,10 +211,8 @@
                 "osDiskSizeGB": "[parameters('osDiskSizeGB')]",
                 "vmSize": "[variables('vmSize')]",
                 "privateIPAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))).ipConfigurations[0].properties.privateIPAddress]",
-                "publicIPResourceId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))]",
                 "virtualNetworkName": "[variables('vnetName')]",
-                "networkSecurityGroupName": "[variables('nsgName')]",
-                "publicDNSDomainName": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))).dnsSettings.domainNameLabel]"
+                "networkSecurityGroupName": "[variables('nsgName')]"
             }
         }
     }
