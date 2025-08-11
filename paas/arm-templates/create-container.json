@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 24,
+            "metadata": {
+                "description": "Name of the storage account."
+            }
+        },
+        "containerName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 63,
+            "metadata": {
+                "description": "Name of the blob container to create."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('containerName'))]",
+            "dependsOn": [],
+            "properties": {
+                "publicAccess": "None"
+            }
+        }
+    ],
+    "outputs": {
+        "containerResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('containerName'))]"
+        },
+        "containerUrl": {
+            "type": "string",
+            "value": "[format('https://{0}.blob.core.windows.net/{1}', parameters('storageAccountName'), parameters('containerName'))]"
+        }
+    }
+}
